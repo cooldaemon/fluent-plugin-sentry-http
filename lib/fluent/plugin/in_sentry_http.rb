@@ -6,6 +6,8 @@ module Fluent
 
     config_param :format, :string, :default => 'sentry_http'
 
+    attr_reader :mapping
+
     def initialize
       super
       @mapping = {}

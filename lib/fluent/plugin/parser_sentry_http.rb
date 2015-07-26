@@ -20,14 +20,14 @@ module Fluent
 
       def parse(text)
         message = Zlib::Inflate.inflate(Base64.decode64(text))
+        record = Oj.load(message, :mode => :compat)
 
-        if @json_parse
-          record = Oj.load(message, :mode => :compat)
-        else
-          record = {@field_name => message}
-        end
+        record_time = record['timestamp']
+        time = record_time.nil? ? Engine.now : Time.parse(record_time).to_i
 
-        yield Engine.now, record
+        record = {@field_name => message} unless @json_parse
+
+        yield time, record
       rescue => e
         $log.warn "parse error: #{e.message}"
         yield nil, nil
