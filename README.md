@@ -1,6 +1,6 @@
 # fluent-plugin-sentry-http
 
-[fluentd](http://fluentd.org) input plugin that receive exceptions from the Sentry clients(Raven).}
+[fluentd](http://fluentd.org) input plugin that receive exceptions from [Sentry Clients](https://github.com/getsentry).
 
 [![Build Status](https://travis-ci.org/cooldaemon/fluent-plugin-sentry-http.svg?branch=master)](https://travis-ci.org/cooldaemon/fluent-plugin-sentry-http)
 
