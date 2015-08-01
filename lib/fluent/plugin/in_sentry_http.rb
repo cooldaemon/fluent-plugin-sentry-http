@@ -16,27 +16,27 @@ module Fluent
     def configure(conf)
       super
       conf.elements.select {|element|
-        element.name == 'application'
+        element.name == 'project'
       }.each do |element|
         @mapping[element.arg] = {
           'tag' => element['tag'],
-          'user' => element['user'],
-          'pass' => element['pass'],
+          'key' => element['key'],
+          'secret' => element['secret'],
         }
       end
     end
 
     def on_request(path_info, params)
       begin
-        application = @mapping[path_info.split('/')[2]]  # /api/999/store/
-        raise 'not found' unless application
+        project = @mapping[path_info.split('/')[2]]  # /api/999/store/
+        raise 'not found' unless project
       rescue
         return ['404 Not Found', {'Content-type' => 'text/plain'}, '']
       end
 
       begin
-        user, pass = get_auth_info(params)
-        raise 'unauthorized' unless application['user'] == user and application['pass'] == pass
+        key, secret = get_auth_info(params)
+        raise 'unauthorized' unless project['key'] == key and project['secret'] == secret
       rescue
         return ['401 Unauthorized', {'Content-type' => 'text/plain'}, '']
       end
@@ -45,7 +45,7 @@ module Fluent
         time, record = parse_params(params)
         raise 'Record not found' if record.nil?
 
-        record['tag'] = application['tag']
+        record['tag'] = project['tag']
         record['time'] = time
 
         if @add_http_headers
@@ -64,7 +64,7 @@ module Fluent
       end
 
       begin
-        router.emit(application['tag'], time, record)
+        router.emit(project['tag'], time, record)
       rescue
         return ['500 Internal Server Error', {'Content-type' => 'text/plain'}, "500 Internal Server Error\n#{$!}\n"]
       end
@@ -86,18 +86,18 @@ module Fluent
     end
 
     def get_auth_info(params)
-      user = nil
-      pass = nil
+      sentry_key = nil
+      sentry_secret = nil
       params['HTTP_X_SENTRY_AUTH'].split(', ').each do |element|
         key, value = element.split('=')
         case key
         when 'sentry_key'
-          user = value
+          sentry_key = value
         when 'sentry_secret'
-          pass = value
+          sentry_secret = value
         end
       end
-      return user, pass
+      return sentry_key, sentry_secret
     end
   end
 end
