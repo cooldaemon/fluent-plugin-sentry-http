@@ -11,20 +11,20 @@ class SentryHttpInputTest < Test::Unit::TestCase
 
   PORT = unused_port
   HOST = '127.0.0.1'
-  APPLICATION = 999
+  PROJECT = 999
   TAG = 'from.raven'
-  USER = 'test_user'
-  PASS = 'test_pass'
+  KEY = 'test_key'
+  SECRET = 'test_secret'
 
   CONFIG = %[
     port #{PORT}
     bind #{HOST}
 
-    <application #{APPLICATION}>
+    <project #{PROJECT}>
       tag #{TAG}
-      user #{USER}
-      pass #{PASS}
-    </application>
+      key #{KEY}
+      secret #{SECRET}
+    </project>
   ]
 
   def create_driver(conf=CONFIG)
@@ -36,10 +36,10 @@ class SentryHttpInputTest < Test::Unit::TestCase
     assert_equal PORT, d.instance.port
     assert_equal '127.0.0.1', d.instance.bind
 
-    application = d.instance.mapping[APPLICATION.to_s]
-    assert_equal TAG, application['tag']
-    assert_equal USER, application['user']
-    assert_equal PASS, application['pass']
+    project = d.instance.mapping[PROJECT.to_s]
+    assert_equal TAG, project['tag']
+    assert_equal KEY, project['key']
+    assert_equal SECRET, project['secret']
   end
 
   def test_success_request
@@ -48,8 +48,8 @@ class SentryHttpInputTest < Test::Unit::TestCase
     d.expect_emit TAG, time, expect_record
     d.run do
       res = post_record(
-        APPLICATION,
-        create_headers(time, USER, PASS),
+        PROJECT,
+        create_headers(time, KEY, SECRET),
         record_to_payload(record))
       assert_equal '200', res.code
     end
@@ -61,7 +61,7 @@ class SentryHttpInputTest < Test::Unit::TestCase
     d.run do
       res = post_record(
         998,
-        create_headers(time, USER, PASS),
+        create_headers(time, KEY, SECRET),
         record_to_payload(record))
       assert_equal '404', res.code
     end
@@ -72,14 +72,14 @@ class SentryHttpInputTest < Test::Unit::TestCase
     d = create_driver
     d.run do
       res = post_record(
-        APPLICATION,
-        create_headers(time, 'ham', PASS),
+        PROJECT,
+        create_headers(time, 'ham', SECRET),
         record_to_payload(record))
       assert_equal '401', res.code
 
       res = post_record(
-        APPLICATION,
-        create_headers(time, USER, 'egg'),
+        PROJECT,
+        create_headers(time, KEY, 'egg'),
         record_to_payload(record))
       assert_equal '401', res.code
     end
@@ -90,8 +90,8 @@ class SentryHttpInputTest < Test::Unit::TestCase
     d = create_driver
     d.run do
       res = post_record(
-        APPLICATION,
-        create_headers(time, USER, PASS),
+        PROJECT,
+        create_headers(time, KEY, SECRET),
         'spam')
       assert_equal '400', res.code
     end
@@ -107,9 +107,9 @@ class SentryHttpInputTest < Test::Unit::TestCase
     return time, record, expect_record
   end
 
-  def create_headers(time, user, pass)
+  def create_headers(time, key, secret)
     {
-      'X-Sentry-Auth' => "Sentry sentry_timestamp=#{time}, sentry_client=raven-python/5.2.0, sentry_version=6, sentry_key=#{user}, sentry_secret=#{pass}",
+      'X-Sentry-Auth' => "Sentry sentry_timestamp=#{time}, sentry_client=raven-python/5.2.0, sentry_version=6, sentry_key=#{key}, sentry_secret=#{secret}",
       'Content-Type' => 'application/octet-stream',
       'User-Agent' => 'raven-python/5.2.0',
     }
@@ -128,9 +128,9 @@ class SentryHttpInputTest < Test::Unit::TestCase
     Base64.encode64(compressed_text)
   end
 
-  def post_record(application, headers, payload)
+  def post_record(project, headers, payload)
     http = Net::HTTP.new(HOST, PORT)
-    req = Net::HTTP::Post.new("/api/#{application}/store/", headers)
+    req = Net::HTTP::Post.new("/api/#{project}/store/", headers)
     req.body = payload
     http.request(req)
   end

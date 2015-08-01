@@ -29,11 +29,11 @@ Plugin to accept exception input from [Sentry Clients](https://github.com/getsen
   type sentry_http
   port 8888
   bind 0.0.0.0
-  <application 999>
+  <project 999>
     tag sentry.egg
-    user aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    pass bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-  </application>
+    key aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    secret bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  </project>
 </source>
 ```
 
