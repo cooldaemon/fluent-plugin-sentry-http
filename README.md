@@ -3,6 +3,7 @@
 [fluentd](http://fluentd.org) input plugin that receive exceptions from [Sentry Clients](https://github.com/getsentry).
 
 [![Build Status](https://travis-ci.org/cooldaemon/fluent-plugin-sentry-http.svg?branch=master)](https://travis-ci.org/cooldaemon/fluent-plugin-sentry-http)
+[![Code Climate](https://codeclimate.com/github/cooldaemon/fluent-plugin-sentry-http/badges/gpa.svg)](https://codeclimate.com/github/cooldaemon/fluent-plugin-sentry-http)
 
 ## Installation
 
